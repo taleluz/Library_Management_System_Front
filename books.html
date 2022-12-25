@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Library Management System</title>
+  <!-- Fav icon -->
+  <link rel="icon" type="image/x-icon" href="images/bookFavIcon.webp">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  <!-- JavaScript Bundle with Popper -->
+  <script src=”https://code.jquery.com/jquery-3.2.1.slim.min.js”
+    integrity=”sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN”
+    crossorigin=”anonymous”></script>
+  <!-- Link to style.css -->
+  <link rel="stylesheet" href="css/style.css">
+  <!--Toastify-->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+
+<body>
+  <!-- Nav bar -->
+  <ul class="nav justify-content-center" style="background-color: rgb(56, 73, 85);">
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="index.html" style="color: white;"><i class="fa fa-home"></i>
+        Home </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="customers.html" style="color: white;"><i class="fa fa-user"></i> Customers</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="books.html" style="color: white;"><i class="fa fa-book"></i> Books</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="loans.html" style="color: white;"><i class="fa fa-paper-plane"></i> Loans</a>
+    </li>
+  </ul>
+
+  <!--Heading  -->
+  <br>
+  <h1 style="text-align: center;">Books Management</h1>
+
+  <!-- Search -->
+  Search: <input id="sr" onkeyup="LoadBooks()" placeholder="find book by name">
+
+  <!-- Trigger/Open The Modal -->
+  <button id="myBtn" class="btn btn-warning">Add a book</button>
+
+  <!-- The Modal -->
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close">&times;</span>
+        <h2>Add a new book</h2>
+      </div>
+      <div class="modal-body">
+        <!-- Fields in Add a book content  -->
+        Name of book:<br><input type="text" placeholder="book name" id="bookName"
+          maxlength="30" required><br>
+
+        The author of the book:<br><input type="text" placeholder="book author"
+          id="author" maxlength="30" required><br>
+
+        Year published:<br><input type="month" min="1900-03" max="2022-12" id="yearPublished" required><br>
+
+        Book type(1/2/3):<br><input type="number" id="typeLoan" placeholder="" min="1" max="3" required><br>
+
+        1 - up tp 10 days
+        <br>
+        2 - up to 5 days
+        <br>
+        3 - up to 2 days
+      </div>
+      <div class="modal-footer">
+        <br></br>
+        <button onclick="AddBook()" class="btn btn-warning">Add a book</button>
+        <br></br>
+      </div>
+    </div>
+  </div>
+
+  <!--Axios  -->
+  <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+  <!-- Display -->
+
+  <div id="display"></div>
+  <script>
+
+    //////////////////////////////Modal's logic/////////////////////////////////////////
+    // Get the modal
+    const modal = document.getElementById("myModal");
+
+    // Get the button that opens the modal
+    const btn = document.getElementById("myBtn");
+
+    // Get the <span> element that closes the modal
+    const span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks the button, open the modal 
+    btn.onclick = () => {
+      modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = () => {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    //////////////////////////////Book's crud/////////////////////////////////////////
+    const MY_SERVER = "https://library-management-system-htwg.onrender.com/books/"
+    axios.get(MY_SERVER).then(res => console.log(res.data))
+
+    //Read-load dataBooks from server
+    const LoadBooks = async (books) => {
+      console.log("first")
+      const res = await axios.get(MY_SERVER)
+      let table = '<table >';
+      table += `<tr><th><center>ID</th><th><center>Book Name</th><th><center>Author</th><th><center>Year published</th><th><center>Type Loan</th><th><center>Actions</th></tr>`;
+      display.innerHTML = res.data.filter(book => book.bookName.toLowerCase().includes(sr.value.toLowerCase())).map(book => {
+        table = table + `<tr>`;
+        table = table + `<td><center>${book.book_id} <br> <img src="images/book.jpg" height="80" width="100"</td>`;
+        table = table + `<td><center>${book.bookName}</td>`;
+        table = table + `<td><center>${book.author}</td>`;
+        table = table + `<td><center>${book.yearPublished}</td>`;
+        table = table + `<td><center>${book.typeLoan}</td>`;
+        table = table + `<td><center><button type="button" class="btn btn-danger" onclick="DelBook(${book.book_id})" >Delete book</button><br></td>`;
+        table += `</tr>`;
+      });
+      table += "</table>";
+      display.innerHTML = table;
+
+
+    }
+
+    LoadBooks()
+
+
+    // Create-add a resorce from client to dataBooks from server
+    const AddBook = async () => {
+      if ((bookName.value.length > 2) && (author.value.length > 2) && (yearPublished.value.length > 0) && (typeLoan.value.length == 1 && ((typeLoan.value == 1) || (typeLoan.value == 2) || (typeLoan.value == 3))))
+        await axios.post(MY_SERVER, { bookName: bookName.value, author: author.value, yearPublished: yearPublished.value, typeLoan: typeLoan.value }).then((res) => console.log(res.data))
+
+      else {
+        // Display message if the fields are empty
+        if (!((bookName.value.length > 2) && (author.value.length > 2) && (yearPublished.value.length > 0) && (typeLoan.value.length == 1))) 
+        { { Fill_In_Fields() } }
+
+        // Display message if the book type field is not between 1-3
+        else if (typeLoan.value.length != 1 || (typeLoan.value != 1) || (typeLoan.value != 2) || (typeLoan.value != 3)) {
+          { book_type_wrong() }
+        }
+      }
+      console.log(((bookName.value.length > 2) && (author.value.length > 2) && (yearPublished.value.length > 0) && (typeLoan.value.length == 1)))
+    }
+
+
+    // Delete-dataBooks from server
+    const DelBook = (id) => {
+      const Del_Book = () => { axios.delete(MY_SERVER + id).then((res) => console.log(res.data)) }
+      Approval_operations()
+      setTimeout(Del_Book, 3000)
+    }
+
+
+    // Toastify- Message by Deleting a book
+    const Approval_operations = () => {
+      Toastify({
+        text: "The book was successfully deleted",
+        duration: 3000,
+        destination: "https://github.com/apvarun/toastify-js",
+        newWindow: true,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: "center", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #00b09b, #384955)",
+        },
+        onClick: function () { } // Callback after click
+      }).showToast();
+      LoadBooks()
+    }
+
+    // Toastify-Message by empty fields
+    const Fill_In_Fields = () => {
+      Toastify({
+        text: "Please fill in all the fields of the book",
+        duration: 3000,
+        destination: "https://github.com/apvarun/toastify-js",
+        newWindow: true,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: "center", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #00b09b, #384955)",
+        },
+        onClick: function () { } // Callback after click
+      }).showToast();
+    }
+
+    // Toastify- Message by insert wrong type book
+    const book_type_wrong = () => {
+      Toastify({
+        text: "book type can be between 1 to 3",
+        duration: 3000,
+        destination: "https://github.com/apvarun/toastify-js",
+        newWindow: true,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: "center", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #00b09b, #384955)",
+        },
+        onClick: function () { } // Callback after click
+      }).showToast();
+    }
+
+
+
+  </script>
+
+</body>
+
+</html>

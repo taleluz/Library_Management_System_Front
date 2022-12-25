@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+  <title>Library Management System</title>
+  <!-- Fav icon -->
+  <link rel="icon" type="image/x-icon" href="images/bookFavIcon.webp">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--Bootstrap-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- JavaScript Bundle with Popper -->
+  <script src=”https://code.jquery.com/jquery-3.2.1.slim.min.js”
+    integrity=”sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN”
+    crossorigin=”anonymous”></script>
+  <!--Toastify-->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+</head>
+
+<body>
+
+  <!-- Nav bar -->
+  <ul class="nav justify-content-center" style="background-color: rgb(56, 73, 85);">
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="index.html" style="color: white;"><i class="fa fa-home"></i>
+        Home </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="customers.html" style="color: white;"><i class="fa fa-user"></i> Customers</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="books.html" style="color: white;"><i class="fa fa-book"></i> Books</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="loans.html" style="color: white;"><i class="fa fa-paper-plane"></i> Loans</a>
+    </li>
+  </ul>
+
+  <!-- Heading -->
+  <br>
+  <h1 style="text-align: center;">Customers Management</h1>
+
+
+  <!-- Search -->
+  Search: <input id="sr" onkeyup="LoadCustomers()" placeholder="find customer by name">
+
+
+  <!-- Trigger/Open The Modal -->
+  <button id="myBtn" class="btn btn-warning">Add a new customer</button>
+
+  <!-- The Modal -->
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close">&times;</span>
+        <h2>Add a new customer</h2>
+      </div>
+      <div class="modal-body">
+        <!--Fields in Add a customer content-->
+        Customer's name:
+        <br><input type="text" placeholder="customer's name"
+          id="customerName" maxlength="30" required><br>
+
+        Customer's city:
+        <br><input type="text" placeholder="customer's city" id="city"
+          maxlength="30" required><br>
+
+        Customer's age:
+        <br><input type="number" placeholder="" max="120" id="age" required><br>
+
+        Customer's status: 
+        <input type="checkbox" id="customerStatus" value="on" required>
+      </div>
+
+      <!--Modal footer-->
+      <div class="modal-footer">
+        <br></br>
+        <button onclick="AddCustomer()" class="btn btn-warning">Add a new customer</button>
+        <br></br>
+      </div>
+    </div>
+  </div>
+
+  <!-- Axios -->
+  <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+
+  <!-- Display -->
+  <div id="display"></div>
+  <script>
+
+    //////////////////////////////Modal's logic/////////////////////////////////////////
+    // Get the modal
+    const modal = document.getElementById("myModal");
+
+    // Get the button that opens the modal
+    const btn = document.getElementById("myBtn");
+
+    // Get the <span> element that closes the modal
+    const span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks the button, open the modal 
+    btn.onclick = () => {
+      modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = () => {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+    const MY_SERVER = "https://library-management-system-htwg.onrender.com/customers/"
+    axios.get(MY_SERVER).then(res => console.log(res.data))
+
+    const LoadCustomers = async (customers) => {
+      const res = await axios.get(MY_SERVER)
+      let table = '<table>';
+      table += `<tr><th><center>ID</th>
+                <th><center>Customer's Name</th>
+                <th><center>Customer's City</th>
+                <th><center>Customer's Age</th>
+                <th><center>Status</th></tr>`;
+      display.innerHTML = res.data.filter(customer => customer.customerName.toLowerCase().includes(sr.value.toLowerCase())).map(customer => {
+        table = table + `<td><center>${customer.customer_id}<br><img src="images/customer.jpg" height="80" width="100" </td>`;
+        table = table + `<td><center>${customer.customerName}</td>`;
+        table = table + `<td><center>${customer.city}</td>`;
+        table = table + `<td><center>${customer.age}</td>`;
+        table = table + `<td><center>Click on the button <br> to change customer's status <br><button class="btn btn-danger" onclick="UpdCustomer(${customer.customer_id})">${customer.customerStatus}</button></td>`;
+        table += `</tr>`;
+      });
+      table += "</table>";
+      display.innerHTML = table;
+    }
+    LoadCustomers()
+
+
+    // Create -add a resorce from client to server
+    const AddCustomer = async () => {
+      if ((customerName.value.length > 2) && (city.value.length > 2) && (age.value.length > 0))
+        await axios.post(MY_SERVER, { customerName: customerName.value, city: city.value, age: age.value, customerStatus: customerStatus.value }).then((res) => console.log(res.data))
+        // Display message if the fields are empty
+      else { Fill_In_Fields() }
+    }
+
+    // Update -change status's customer on/off
+    const UpdCustomer = async (id) => {
+      if (customerStatus.value == 'on') {
+        customerStatus.value = 'off';
+        customerStatus.innerHTML = 'off';
+      }
+      else {
+        customerStatus.value = 'on'; customerStatus.innerHTML = 'on';
+      }
+      await axios.put(MY_SERVER + id, { customerStatus: customerStatus.value }).then((res) => console.log(res.data))
+    }
+
+
+
+    // Toastify
+    const Fill_In_Fields = () => {
+      Toastify({
+        text: "Please fill in all the fields of the Customer",
+        duration: 3000,
+        destination: "https://github.com/apvarun/toastify-js",
+        newWindow: true,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: "center", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #00b09b, #384955)",
+        },
+        onClick: function () { } // Callback after click
+      }).showToast();
+    }
+
+  
+  </script>
+</body>
+
+</html>

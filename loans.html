@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<title>Library Management System</title>
+<!-- Fav icon -->
+<link rel="icon" type="image/x-icon" href="images/bookFavIcon.webp">
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--Bootstrap-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+<link rel="stylesheet" href="css/style.css">
+<!-- JavaScript Bundle with Popper -->
+<script src=”https://code.jquery.com/jquery-3.2.1.slim.min.js”
+  integrity=”sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN” crossorigin=”anonymous”></script>
+<!-- link to calculate current date -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- calculate delta days -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment-with-locales.min.js"></script>
+<!--Toastify-->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+</head>
+
+<body>
+  <!-- Nav bar -->
+  <ul class="nav justify-content-center" style="background-color: rgb(56, 73, 85);">
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="index.html" style="color: white;"><i class="fa fa-home"></i>
+        Home </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="customers.html" style="color: white;"><i class="fa fa-user"></i> Customers</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="books.html" style="color: white;"><i class="fa fa-book"></i> Books</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="loans.html" style="color: white;"><i class="fa fa-paper-plane"></i> Loans</a>
+    </li>
+  </ul>
+
+  <!-- Heading -->
+  <br>
+  <h1 style="text-align: center;">Loans Management</h1>
+
+
+  <!-- Search -->
+  Search: <input id="sr" onkeyup="getAllLoans()" placeholder="find loan by book name">
+
+
+  <!-- Trigger/Open The Modal -->
+  <button id="myBtn" class="btn btn-warning">Add a new loan</button>
+
+  <!-- The Modal -->
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close">&times;</span>
+        <h2>Add a new loan</h2>
+
+      </div>
+      <div class="modal-body">
+        <!-- Fields in Add a loan content  -->
+        customer id:
+        <br><input type="number" minlength="1" id="CustomerID" required><br>
+
+        book id:
+        <br><input type="number" minlength="1" id="BookID" required><br>
+
+        Loan date:
+        <br><input type="date" id="Loandate" name="date" required><br>
+
+        returndate:
+        <br><input type="date" min="1900-03" max="2022-12" id="Returndate" required><br>
+
+        book type(1) - returndate up tp 10 days
+        <br>
+        book type(2) - returndate up to 5 days
+        <br>
+        book type(3) - returndate up to 2 days
+      </div>
+
+      <!--Modal footer-->
+      <div class="modal-footer">
+        <br></br>
+        <button onclick="AddLoan()" class="btn btn-warning">Add a new loan</button>
+        <br></br>
+      </div>
+    </div>
+  </div>
+
+  <!-- Axios -->
+  <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+
+  <!-- showLoans -->
+  <div id="showLoans"></div>
+
+  <script>
+
+    //////////////////////////////Modal's logic/////////////////////////////////////////
+    // Get the modal
+    const modal = document.getElementById("myModal");
+
+    // Get the button that opens the modal
+    const btn = document.getElementById("myBtn");
+
+    // Get the <span> element that closes the modal
+    const span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks the button, open the modal 
+    btn.onclick = () => {
+      modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = () => {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+  </script>
+
+
+  <script>
+    const MY_SERVER = "https://library-management-system-htwg.onrender.com/loans/"
+    const MY_SERVER_CUSTOMERS = "https://library-management-system-htwg.onrender.com/customers/"
+    const MY_SERVER_BOOKS = "https://library-management-system-htwg.onrender.com/books/"
+    axios.get(MY_SERVER).then(res => console.log(res.data))
+
+
+    let loan_status = ""
+    // Read-load dataLoans from server
+    const getAllLoans = async () => {
+      let msg = ""
+      msg += `<table style="text-align: center;">`;
+      msg += `<tr>`;
+      msg += `<th><center>Loan's ID</th>`;
+      msg += `<th><center>Book's ID</th>`;
+      msg += `<th><center>Book name</th>`;
+      msg += `<th><center>Book type</th>`;
+      msg += `<th><center>Customer's ID</th>`;
+      msg += `<th><center>Customer name</th>`;
+      msg += `<th><center>Loan's Date</th>`;
+      msg += `<th><center>Loan's Return Date</th>`;
+      msg += `<th><center>Status</th>`;
+      msg += `<th><center>Actions</th>`;
+      msg += `</tr>`;
+      let res = ""
+      await fetch(MY_SERVER, { method: "GET" }).then((response) => response.json()).then((data) => res = data);
+      console.log(res)
+      showLoans.innerHTML = res.filter(loan => loan.bookName.toLowerCase().includes(sr.value.toLowerCase())).map((loan) => {
+
+        //  calculate delta between loandate and returndate
+        var start = moment(loan.Loandate);
+        var future = moment(loan.Returndate);
+        var d = future.diff(start, 'days');
+        console.log(d);
+
+        // Display loan status by loandate, returndate and book-type
+        loan.loan_status = "ON TIME"
+
+        if (loan.typeLoan == 1 && d > 10 && loan.Returndate < currentDate) loan.loan_status = "LATE"
+        else if (loan.typeLoan == 1 && d == 10 && loan.Returndate == currentDate) loan.loan_status = "DUE TODAY"
+        else if (loan.typeLoan == 2 && d > 5 && loan.Returndate < currentDate) loan.loan_status = "LATE"
+        else if (loan.typeLoan == 2 && d == 5 && loan.Returndate == currentDate) loan.loan_status = "DUE TODAY"
+        else if (loan.typeLoan == 3 && d > 2 && loan.Returndate < currentDate) loan.loan_status = "LATE"
+        else if (loan.typeLoan == 3 && d == 2 && loan.Returndate == currentDate) loan.loan_status = "DUE TODAY"
+
+        console.log("loan book type" + loan.typeLoan)
+        console.log("loan book id" + loan.BookID)
+        console.log(loan.loan_status)
+        console.log("customer id" + loan.CustomerID)
+        console.log(currentDate)
+
+
+        {
+          msg += `<tr>`;
+          msg += `<td><center>${loan.loan_id} <br> <img src="images/loan.jpg" height="80" width="100"></td>`;
+          msg += `<td><center>${loan.BookID}</td>`;
+          msg += `<td><center>${loan.bookName}</td>`;
+          msg += `<td><center>${loan.typeLoan}</td>`;
+          msg += `<td><center>${loan.CustomerID}</td>`;
+          msg += `<td><center>${loan.customerName}</td>`;
+          msg += `<td><center>${loan.Loandate}</td>`;
+          msg += `<td><center>${loan.Returndate}</td>`;
+
+          // Check if loan status="LATE" and if so colored it in red
+          if (loan.loan_status == "LATE") {
+            msg += `<td style="color:red"><center>${loan.loan_status}</td>`
+          }
+          else {
+            msg += `<td><center>${loan.loan_status}</td>`
+          }
+          msg += `<td><center><button onclick="DelLoan(${loan.loan_id})" class="btn btn-danger">Return a book</button></td>`;
+
+          msg += `</tr>`;
+        }
+      }
+      ).join("")
+      showLoans.innerHTML = msg
+    }
+    getAllLoans();
+
+    // Create-add a resorce from client to dataLoans from server
+    const AddLoan = async () => {
+      customers = await axios.get(MY_SERVER_CUSTOMERS)
+      books = await axios.get(MY_SERVER_BOOKS)
+      // Check if the fields are empty 
+      if ((CustomerID.value.length > 0) && (BookID.value.length > 0) && (Loandate.value.length > 0) && (Returndate.value.length > 0))
+        // Check if the fields of the customer id and book id are correct and post them
+        if (customers.data.some(customer => CustomerID.value == customer.customer_id) && books.data.some((book => BookID.value == book.book_id))) {
+          console.log("yes")
+          axios.post(MY_SERVER, { CustomerID: CustomerID.value, BookID: BookID.value, Loandate: Loandate.value, Returndate: Returndate.value, loan_status:"ON_TIME" })
+
+        }
+        // Display message if the customer id isn't correct
+        else {
+          if (!customers.data.some(customer => customer.customer_id == CustomerID.value)) {
+            console.log("name wrong")
+            {wrong_customer_ID()}
+
+          }
+
+          // Display message if the book id isn't correct
+          if (!books.data.some(book => book.book_id == BookID.value)) {
+            console.log("book wrong")
+            {wrong_Book_ID()}
+
+          }
+        }
+    }
+
+    // Delete - dataLoan from server-return a book
+    const DelLoan = async (id) => {
+      console.log(id)
+      await axios.delete(MY_SERVER + id).then((res) => console.log(res.data))
+
+    }
+
+
+    ////////////////////////// DEFINE CURRENT DATE ////////////////////////////////////////
+    const date = new Date();
+
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+
+    // This arrangement can be altered based on how we want the date's format to appear.
+    let currentDate = `${year}-${month}-${day}`;
+    console.log(currentDate); // "17-6-2022"
+
+
+
+    // Toastify- Display message if the customer id isn't correct
+    const wrong_customer_ID = () => {
+      Toastify({
+        text: "Wrong customer ID, Please fill another",
+        duration: 3000,
+        destination: "https://github.com/apvarun/toastify-js",
+        newWindow: true,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: "center", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #00b09b, #384955",
+        },
+        onClick: function () { } // Callback after click
+      }).showToast();
+    }
+
+
+    // Toastify- Display message if the customer id isn't correct
+    const wrong_Book_ID = () => {
+      Toastify({
+        text: "Wrong book ID, Please fill another",
+        duration: 3000,
+        destination: "https://github.com/apvarun/toastify-js",
+        newWindow: true,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: "center", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #00b09b, #384955)",
+        },
+        onClick: function () { } // Callback after click
+      }).showToast();
+    }
+  </script>
+
+</body>
+
+</html>
