@@ -125,19 +125,19 @@
         modal.style.display = "none";
       }
     }
-    const MY_SERVER = "https://library-management-system-htwg.onrender.com/customers/"
+    const MY_SERVER = "http://127.0.0.1:5000/customers/"
     axios.get(MY_SERVER).then(res => console.log(res.data))
 
     const LoadCustomers = async (customers) => {
       const res = await axios.get(MY_SERVER)
       let table = '<table>';
-      table += `<tr><th><center>ID</th>
+      table += `<tr><th><center>Customer's ID</th>
                 <th><center>Customer's Name</th>
                 <th><center>Customer's City</th>
                 <th><center>Customer's Age</th>
                 <th><center>Status</th></tr>`;
       display.innerHTML = res.data.filter(customer => customer.customerName.toLowerCase().includes(sr.value.toLowerCase())).map(customer => {
-        table = table + `<td><center>${customer.customer_id}<br><img src="images/customer.jpg" height="80" width="100" </td>`;
+        table = table + `<td><center><img src="images/customer.jpg" height="80" width="100" </td>`;
         table = table + `<td><center>${customer.customerName}</td>`;
         table = table + `<td><center>${customer.city}</td>`;
         table = table + `<td><center>${customer.age}</td>`;
